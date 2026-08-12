@@ -103,24 +103,39 @@ The production stack is containerized with `docker-compose.yml` and includes:
 
 ## Other Pipelines & Features
 
-Beyond the AHP safety module, the full SylvaNexus platform includes:
+Beyond the AHP safety module, the full SylvaNexus platform operates multiple services on a single AWS EC2 instance (Tokyo `ap-northeast-1`) via Docker Compose:
 
-- **Forest photo pipeline** — field photos with EXIF GPS → S3 → map markers
-- **Summit/registration portal** — event sign-up, paper upload, admin dashboard
-- **Editorial CMS** — forest-science articles and news
-- **Legal / research RAG** — document Q&A over forestry laws and papers
-- **Google Earth Engine bridge** — NDVI, canopy height, and satellite change detection
-- **S3 file registry** — unified upload/download/presigned-URL API across modules
+| Service | Status | Description |
+|---------|--------|-------------|
+| **Forest Safety & AHP** | Production | Multi-hazard early-warning with AHP composite index |
+| **Forest Photo Pipeline** | Production | EXIF GPS photos → S3 → map markers |
+| **Summit Registration** | Production | Academic event portal with paper upload & payment |
+| **Editorial CMS** | Production | Forest-science articles and news publishing |
+| **GEE Satellite Bridge** | Production | NDVI, canopy height, SAR landslide detection, InSAR deformation |
+| **GIS Service (PostGIS)** | Production | Spatial analysis, terrain_risk_grid, compartment boundaries |
+| **Unified File Registry** | Production | Cross-module S3 file management with presigned URLs |
+| **Monitoring & Alerting** | Production | Uptime monitor + Sentry + LINE/Email advisories |
+| **Scenario Engine** | Dev | Forest management simulation (growth, harvest, carbon) |
+| **Knowledge MCP / RAG** | Dev | Document Q&A over forestry laws and research papers |
+
+**Full architecture diagram:** see [`platform_concept_en.html`](platform_concept_en.html) for a visual overview of all services, AWS infrastructure, and the future vision.
 
 ---
 
-## Future Roadmap
+## From Reference to Real-Time Field Action
 
-- **Edge computing** — lightweight inference on field gateways; local cache of risk grid for off-network crews
-- **Mobile app** — push alerts, offline map tiles, check-in/check-out for field workers
-- **Multi-project expansion** — Japan (Shikoku/Kumamoto) and other Taiwan sites beyond Baxianshan
+The AHP framework by Rahmawati et al. (2025) provides a critical reference for assessing natural-information risks to human life and property in forest operations. However, translating a static assessment into **real-time, actionable field support** requires bridging the gap between the GIS platform and the crew on the mountain.
+
+Our goal is to make the GIS platform not just a map or a report, but a **living, interactive real-time assistance tool**.
+
+### Future Roadmap
+
+- **Mobile app** — native app for forest workers: real-time risk map with GPS, push alerts, check-in/check-out, offline tiles, photo reporting, crew safety status
+- **Low-orbit satellite integration** — Starlink/Iridium connectivity for remote mountains without cellular: real-time weather sync, SOS signals, IoT sensor uplink, edge-cached risk grid refresh
+- **Edge computing** — lightweight inference on field gateways; local cache of AHP risk grid for off-network use; on-device threshold alerts; federated sync when connectivity returns
 - **Real-time IoT** — rain gauges, soil moisture, wind masts feeding directly into the AHP score
-- **LLM advisory** — Gemini-generated, locale-aware safety language and crew briefings
+- **LLM advisory** — Gemini-generated, locale-aware safety briefings (CN/JP/EN) with voice interface for hands-free field use
+- **Multi-project expansion** — Japan (Shikoku/Kumamoto) and other Taiwan sites beyond Baxianshan
 
 ---
 
