@@ -1,17 +1,130 @@
-# SylvaNexus GIS-AHP Forest Operations Safety Index
+# SylvaNexus (HiiForest) GIS-AHP Forest Operations Safety Platform
 
-A GIS-based multi-hazard occupational safety early-warning platform for mountain forestry in Taiwan, integrating the Analytic Hierarchy Process (AHP) composite safety index from Rahmawati et al. (2025).
+A real-time, GIS-based multi-hazard occupational safety early-warning platform for mountain forestry in Taiwan, integrating the Analytic Hierarchy Process (AHP) composite safety index from Rahmawati et al. (2025).
 
-## Core Components
+---
 
-- **AHP decision engine** — pairwise comparison, Saaty consistency check, geometric-mean eigenvector weights
-- **14 safety criteria** — slope, TWI, geomorphon, elevation, NDVI, canopy height, rainfall, wind, WBGT, soil, accessibility, wildlife, abnormal trees, flow accumulation
-- **Multi-hazard assessment** — landslide, stream surge, treefall, heat stress
-- **GIS spatial mapping** — cell-by-cell AHP safety index as GeoJSON from `terrain_risk_grid`
-- **FastAPI endpoints** — `/safety-index-map`, `/terrain-profile`, `/ahp-weights`, `/compute-static-risk`
-- **LINE / Email notifications** — multi-lingual advisory messages
+## What the Platform Does
 
-## File Map
+SylvaNexus combines weather data, terrain analysis, and an AHP-weighted safety model to assess forest-work risk before crews enter the field. It is designed for Taiwan mountain forestry but is built to be extensible to Pacific-Asia contexts.
+
+**Core capabilities**
+
+- **Multi-hazard risk scoring** — landslide, stream surge, treefall, heat stress
+- **AHP-weighted safety index** — 14 criteria, auditable pairwise weights, Saaty consistency check
+- **Real-time weather** — Central Weather Administration (CWA) and Japan Meteorological Agency (JMA)
+- **Spatial GIS mapping** — PostGIS `terrain_risk_grid` with DEM-derived factors (slope, TWI, geomorphon, elevation, NDVI, canopy height)
+- **Alerting** — LINE Notify and email for yellow / red advisories
+- **Web + mobile ready** — FastAPI backend with nginx, frontend served as static SPA
+
+---
+
+## Information Flow
+
+```
+Terrain data (PostGIS) ──────────┐
+DEM / NDVI / canopy (GEE/S3) ────┼──▶ GIS service ──▶ AHP safety index
+Real-time weather (CWA/JMA) ─────┤    (FastAPI)
+                                  │
+                                  ▼
+Backend (FastAPI)  ◀──▶  PostgreSQL/PostGIS  ◀──▶  Scheduled risk checks
+  │                                                      (APScheduler)
+  ├─▶ /landslide-risk          ├─▶ terrain_risk_grid
+  ├─▶ /safety-index-map        └─▶ alert_logs
+  ├─▶ /weather/forecast
+  └─▶ LINE / Email notifier
+
+Frontend (nginx / SPA)
+  ├─▶ Web GIS map with color-coded risk grid
+  ├─▶ Advisory dashboard
+  └─▶ Mobile-friendly alert view
+```
+
+1. **Ingest** — CWA/JMA weather, GEE satellite indices, and local DEM/terrain layers are loaded into PostGIS.
+2. **Compute** — GIS service computes per-cell AHP safety scores; backend runs scheduled multi-hazard checks.
+3. **Notify** — When risk reaches a threshold, LINE and email alerts are sent in the local language.
+4. **Visualize** — Web and mobile frontends show the risk grid, forecast, and active advisories.
+
+---
+
+## AHP Safety Index
+
+The 14 criteria, grouped by domain, are scored and weighted by AHP:
+
+| Domain | Criteria |
+|--------|----------|
+| Terrain | slope, elevation, aspect, TWI, flow accumulation, geomorphon |
+| Vegetation | NDVI, canopy height, abnormal trees |
+| Weather | rainfall (RT), wind speed, WBGT heat stress |
+| Operations | soil type, accessibility (minutes), wildlife |
+
+The weight vector is derived from a pairwise comparison matrix with a consistency-ratio check. Any matrix exceeding the Saaty threshold is rejected, so weights are always auditably consistent.
+
+Two scores are produced:
+
+- **Composite score** — dynamic, including weather variables (1–5, 5 = highest risk)
+- **Static score** — terrain-only, used for baseline spatial mapping and long-term zoning
+
+---
+
+## PostGIS & Spatial Stack
+
+- `terrain_risk_grid` — raster/vector grid storing DEM-derived parameters per cell
+- `baxianshan` schema — Taiwan demo site with slope, TWI, geomorphon, elevation, NDVI, canopy height
+- PostGIS functions — point-in-polygon lookup, GeoJSON generation, nearest-cell queries
+- GIS endpoints:
+  - `POST /safety-index-map` — returns GeoJSON of AHP scores
+  - `POST /terrain-profile` — returns terrain parameters at a given coordinate
+  - `GET  /ahp-weights` — returns the AHP weight audit trail
+
+---
+
+## AWS & Runtime Environment
+
+| Layer | Technology |
+|-------|------------|
+| Compute | AWS EC2 (Tokyo `ap-northeast-1`) running Docker Compose |
+| Reverse proxy | nginx + ALB with HTTPS (ACM) |
+| Object storage | S3 (`hiiforest-assets`) for photos, GIS exports, research PDFs |
+| Database | PostgreSQL 15 + PostGIS on EC2 |
+| Secrets | AWS Secrets Manager / host-mounted key files |
+| CI/CD | GitHub Actions → SSM Run Command on EC2 |
+| Monitoring | Uptime monitor (GitHub Actions) + Sentry error tracking |
+
+The production stack is containerized with `docker-compose.yml` and includes:
+
+- `backend` (FastAPI)
+- `gis-service` (FastAPI + PostGIS)
+- `frontend` (nginx static)
+- `postgres` (PostGIS)
+- `minio` (S3-compatible local object store for dev)
+
+---
+
+## Other Pipelines & Features
+
+Beyond the AHP safety module, the full SylvaNexus platform includes:
+
+- **Forest photo pipeline** — field photos with EXIF GPS → S3 → map markers
+- **Summit/registration portal** — event sign-up, paper upload, admin dashboard
+- **Editorial CMS** — forest-science articles and news
+- **Legal / research RAG** — document Q&A over forestry laws and papers
+- **Google Earth Engine bridge** — NDVI, canopy height, and satellite change detection
+- **S3 file registry** — unified upload/download/presigned-URL API across modules
+
+---
+
+## Future Roadmap
+
+- **Edge computing** — lightweight inference on field gateways; local cache of risk grid for off-network crews
+- **Mobile app** — push alerts, offline map tiles, check-in/check-out for field workers
+- **Multi-project expansion** — Japan (Shikoku/Kumamoto) and other Taiwan sites beyond Baxianshan
+- **Real-time IoT** — rain gauges, soil moisture, wind masts feeding directly into the AHP score
+- **LLM advisory** — Gemini-generated, locale-aware safety language and crew briefings
+
+---
+
+## Repository Contents
 
 ```
 backend/app/weather/
@@ -28,9 +141,16 @@ services/gis-service/app/
   api/endpoints/disaster.py  # GIS safety endpoints
 
 tests/                   # pytest suite (90 tests)
-project_showcase_en.html # English project overview
+project_showcase_en.html # English project overview for the paper author
+diff_report.html         # Code-change diff report
 ```
+
+---
 
 ## Citation / Collaboration
 
-This work extends the AHP forest-work-safety framework of Rahmawati et al. (2025) with real-time GIS and weather data. We welcome research collaboration and feedback.
+This work extends the AHP forest-work-safety framework of **Rahmawati et al. (2025)** with real-time GIS, weather data, and operational alerting. We welcome research collaboration, validation of the AHP criteria in other Pacific-Asia forestry contexts, and feedback on multi-hazard expansion.
+
+- **Platform**: https://hiiforest.com
+- **Full source**: https://github.com/Fuilko/SaaSDocker
+- **Public share (this repo)**: https://github.com/Fuilko/SylvaNexus-Forest-Safety
