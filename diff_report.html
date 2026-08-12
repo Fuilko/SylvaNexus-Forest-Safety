@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GIS-AHP 安全平台改動差異報告</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --heading: #f0f6fc;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --orange: #db6d28;
+    --purple: #bc8cff;
+    --code-bg: #1c2128;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .hero {
+    background: linear-gradient(135deg, #1a2332 0%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 36px;
+  }
+  .hero h1 {
+    font-size: 28px;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+  .hero .subtitle {
+    font-size: 15px;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .hero .meta {
+    font-size: 13px;
+    color: #8b949e;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--heading);
+  }
+  .stat-card .num.green { color: var(--green); }
+  .stat-card .num.blue { color: var(--accent); }
+  .stat-card .num.orange { color: var(--orange); }
+  .stat-card .num.purple { color: var(--purple); }
+  .stat-card .label {
+    font-size: 13px;
+    color: #8b949e;
+    margin-top: 4px;
+  }
+  h2 {
+    font-size: 20px;
+    color: var(--heading);
+    margin: 36px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 16px;
+    color: var(--heading);
+    margin: 24px 0 12px;
+  }
+  .file-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+  }
+  .file-table th {
+    background: var(--card);
+    color: #8b949e;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .file-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .file-table tr:hover { background: var(--card); }
+  .file-path {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 6px;
+  }
+  .badge.new { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+  .badge.modified { background: rgba(210,153,34,0.15); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+  .badge.ported { background: rgba(188,140,255,0.15); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
+  .additions { color: var(--green); font-weight: 600; }
+  .deletions { color: var(--red); font-weight: 600; }
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .section-card .title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-card .desc {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .endpoint-list {
+    list-style: none;
+    padding: 0;
+  }
+  .endpoint-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    font-size: 14px;
+  }
+  .endpoint-list li:last-child { border-bottom: none; }
+  .method {
+    display: inline-block;
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+  .method.GET { background: rgba(63,185,80,0.15); color: var(--green); }
+  .method.POST { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    margin: 12px 0;
+    line-height: 1.5;
+  }
+  .code-block .add { color: var(--green); }
+  .code-block .del { color: var(--red); }
+  .code-block .ctx { color: #8b949e; }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .feature-card .icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .feature-card h4 {
+    font-size: 15px;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+  .feature-card p {
+    font-size: 13px;
+    color: var(--text);
+  }
+  .test-results {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .test-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .test-bar .name {
+    font-weight: 600;
+    color: var(--heading);
+    font-size: 14px;
+    min-width: 280px;
+  }
+  .test-bar .count {
+    font-size: 14px;
+    color: var(--green);
+  }
+  .test-bar .bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(48,54,61,0.5);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .test-bar .bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 4px;
+  }
+  .arch-diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 16px 0;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: #8b949e;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 4px;
+  }
+  .tag.backend { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .tag.gis { background: rgba(219,109,40,0.15); color: var(--orange); }
+  .tag.test { background: rgba(63,185,80,0.15); color: var(--green); }
+  .tag.ahp { background: rgba(188,140,255,0.15); color: var(--purple); }
+  details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 14px;
+    padding: 8px 0;
+  }
+  details summary:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>GIS-AHP 複合安全指數 — 改動差異報告</h1>
+  <div class="subtitle">從單一崩塌通報系統 → 多危害職安平台 + 空間 GIS 風險地圖</div>
+  <div class="meta">
+    基準 commit: <code>b2c7814</code> (research) ·
+    改動日期: 2026-08-11 ·
+    框架依據: Rahmawati, Yovi & Setiawan (2025)
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 統計概覽 -->
+  <div class="summary-grid">
+    <div class="stat-card">
+      <div class="num green">+1,425</div>
+      <div class="label">新增行數</div>
+    </div>
+    <div class="stat-card">
+      <div class="num red">-72</div>
+      <div class="label">刪除行數</div>
+    </div>
+    <div class="stat-card">
+      <div class="num blue">11</div>
+      <div class="label">變更檔案</div>
+    </div>
+    <div class="stat-card">
+      <div class="num orange">4</div>
+      <div class="label">新端點</div>
+    </div>
+    <div class="stat-card">
+      <div class="num green">90</div>
+      <div class="label">測試通過</div>
+    </div>
+    <div class="stat-card">
+      <div class="num purple">3</div>
+      <div class="label">AHP 區域</div>
+    </div>
+  </div>
+
+  <!-- 架構圖 -->
+  <h2>系統架構變更</h2>
+  <div class="arch-diagram">
+┌─────────────────────────────────────────────────────────────────┐
+│  <span style="color:var(--accent)">Backend (FastAPI)</span>                                          │
+│                                                                 │
+│  /weather/landslide-risk                                        │
+│    ├─ CWA 即時雨量 + 氣象站風速/溫濕度 + 鄉鎮預報 + 地震       │
+│    ├─ <span style="color:var(--green)">NEW: use_gis_terrain=true → 呼叫 gis-service</span>       │
+│    │       取得真實 DEM 地形 (slope/TWI/geomorphon/...)        │
+│    ├─ <span style="color:var(--purple)">AHP 14項準則評分 → 複合安全指數 (1-5分, 5級)</span>      │
+│    ├─ 多危害評估: 崩塌 / 溪流暴漲 / 倒木 / 熱危害              │
+│    └─ safety_level (最嚴重危害) → 通知系統                     │
+│                                                                 │
+│  /weather/safety-criteria  <span style="color:var(--green)">(NEW)</span>                               │
+│    └─ AHP 權重 / 一致性比率 / 評分詞彙 審計                    │
+│                                                                 │
+│  app/weather/ahp.py             <span style="color:var(--green)">(NEW 156行)</span>               │
+│  app/weather/safety_criteria.py <span style="color:var(--green)">(NEW 378行)</span>               │
+│  app/weather/safety_index.py    <span style="color:var(--green)">(NEW 399行)</span>               │
+│  app/weather/providers.py       <span style="color:var(--yellow)">+560行 (多危害引擎)</span>      │
+│  app/weather/notifier.py        <span style="color:var(--yellow)">+222行 (通知模板)</span>        │
+│  app/weather/scheduler.py       <span style="color:var(--yellow)">+77行 (排程器)</span>           │
+│  app/weather/router.py          <span style="color:var(--yellow)">+222行 (API + GIS整合)</span>  │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │ httpx (use_gis_terrain)
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  <span style="color:var(--orange)">gis-service (FastAPI)</span>                                       │
+│                                                                 │
+│  /api/v1/{project_id}/disaster/                                 │
+│    ├─ safety-index-map  <span style="color:var(--green)">(NEW)</span> 核心產出: 逐網格 AHP 安全指數   │
+│    │     → GeoJSON FeatureCollection, 5級分色                   │
+│    │     → static (地形only) / composite (含天氣)               │
+│    ├─ terrain-profile   <span style="color:var(--green)">(NEW)</span> 座標查詢地形參數                │
+│    │     → slope/aspect/geomorphon/twi/elevation/ndvi/...       │
+│    ├─ ahp-weights       <span style="color:var(--green)">(NEW)</span> AHP權重審計                    │
+│    │     → groups/criteria/CR/rationale/regions                 │
+│    └─ compute-static-risk <span style="color:var(--yellow)">(UPGRADED)</span> 雙軌計算               │
+│          → 舊版 0-100 + AHP 1-5五級                             │
+│                                                                 │
+│  app/modules/safety/             <span style="color:var(--purple)">(NEW — 從 backend 移植)</span>   │
+│    ├─ ahp.py              (156行)                               │
+│    ├─ safety_criteria.py  (378行)                               │
+│    └─ safety_index.py     (399行)                               │
+│                                                                 │
+│  PostGIS: terrain_risk_grid                                     │
+│    + ahp_static_score   <span style="color:var(--green)">(NEW COLUMN)</span>                       │
+│    + ahp_static_class   <span style="color:var(--green)">(NEW COLUMN)</span>                       │
+│    + ahp_composite_score <span style="color:var(--green)">(NEW COLUMN)</span>                      │
+│    + ahp_composite_class <span style="color:var(--green)">(NEW COLUMN)</span>                      │
+└─────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <!-- 新增功能 -->
+  <h2>新增功能一覽</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">📊</div>
+      <h4>AHP 複合安全指數</h4>
+      <p>14 項安全準則以 Analytic Hierarchy Process 加權，輸出 1-5 分五級安全等級。分為 static（地形only，用於規劃分區）和 composite（含即時天氣，用於動態評估）。</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🗺️</div>
+      <h4>空間安全地圖</h4>
+      <p>逐網格計算 AHP 指數，輸出 GeoJSON FeatureCollection。每個 cell 帶有 static_score / class / colour，可直接渲染分級色塊地圖。</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🌐</div>
+      <h4>三區域 AHP 權重</h4>
+      <p>台灣、日本、印尼各有獨立 pairwise matrix 和評分表，反映不同氣候/地質/生態條件下的危害優先級。一致性比率全部 &lt; 0.10。</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔗</div>
+      <h4>GIS 地形自動取得</h4>
+      <p>backend 設 use_gis_terrain=true + lon/lat，自動從 gis-service PostGIS 取得真實 DEM 地形參數，取代手動預設值。</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⚡</div>
+      <h4>多危害評估引擎</h4>
+      <p>從單一崩塌擴展為四種危害：崩塌/土石流、溪流暴漲、倒木/落枝、熱危害。safety_level 取最嚴重者驅動通知。</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📋</div>
+      <h4>AHP 權重審計</h4>
+      <p>公開端點暴露 AHP 權重、一致性比率、評分詞彙、區域比較基準。滿足專家審查與可追溯性要求。</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📧</div>
+      <h4>通知系統升級</h4>
+      <p>Email + LINE 通知模板更新為多危害安全語言，包含複合指數作為規劃參考。不稀釋官方警報觸發。</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🏗️</div>
+      <h4>雙軌風險計算</h4>
+      <p>compute-static-risk 同時計算舊版 0-100 分（相容既有前端）和 AHP 1-5 五級（新框架），無縫遷移。</p>
+    </div>
+  </div>
+
+  <!-- 檔案變更清單 -->
+  <h2>檔案變更清單</h2>
+  <table class="file-table">
+    <thead>
+      <tr>
+        <th>檔案路徑</th>
+        <th>狀態</th>
+        <th>新增</th>
+        <th>刪除</th>
+        <th>說明</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="file-path">backend/app/weather/ahp.py</span></td>
+        <td><span class="badge new">NEW</span></td>
+        <td class="additions">+156</td>
+        <td class="deletions">0</td>
+        <td>AHP 權重推導 + Saaty 一致性比率檢查</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/app/weather/safety_criteria.py</span></td>
+        <td><span class="badge new">NEW</span></td>
+        <td class="additions">+378</td>
+        <td class="deletions">0</td>
+        <td>台灣/日本/印尼區域 AHP 定義、pairwise matrix、評分表</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/app/weather/safety_index.py</span></td>
+        <td><span class="badge new">NEW</span></td>
+        <td class="additions">+399</td>
+        <td class="deletions">0</td>
+        <td>14 項準則評分函數 + 複合/靜態指數計算 + 分類</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/app/weather/providers.py</span></td>
+        <td><span class="badge modified">MODIFIED</span></td>
+        <td class="additions">+560</td>
+        <td class="deletions">-22</td>
+        <td>多危害評估引擎 (崩塌+溪流+倒木+熱) + AHP 整合</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/app/weather/router.py</span></td>
+        <td><span class="badge modified">MODIFIED</span></td>
+        <td class="additions">+222</td>
+        <td class="deletions">-38</td>
+        <td>API 升級: site-survey 變數 + region + GIS terrain auto-fetch</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/app/weather/notifier.py</span></td>
+        <td><span class="badge modified">MODIFIED</span></td>
+        <td class="additions">+222</td>
+        <td class="deletions">-12</td>
+        <td>Email/LINE 通知模板: 多危害語言 + 複合指數</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/app/weather/scheduler.py</span></td>
+        <td><span class="badge modified">MODIFIED</span></td>
+        <td class="additions">+77</td>
+        <td class="deletions">-0</td>
+        <td>排程器: region + site-survey 變數傳遞</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">services/gis-service/.../disaster.py</span></td>
+        <td><span class="badge modified">MODIFIED</span></td>
+        <td class="additions">+416</td>
+        <td class="deletions">-0</td>
+        <td>3 新端點 + compute-static-risk 升級 + schema AHP 欄位</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">services/gis-service/app/modules/safety/</span></td>
+        <td><span class="badge ported">PORTED</span></td>
+        <td class="additions">+933</td>
+        <td class="deletions">0</td>
+        <td>ahp.py + safety_criteria.py + safety_index.py (從 backend 移植)</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/tests/test_safety_index.py</span></td>
+        <td><span class="badge new">NEW</span></td>
+        <td class="additions">+333</td>
+        <td class="deletions">0</td>
+        <td>AHP 機制 + 評分 + 一致性 + 分類測試</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/tests/test_multihazard.py</span></td>
+        <td><span class="badge new">NEW</span></td>
+        <td class="additions">+306</td>
+        <td class="deletions">0</td>
+        <td>多危害整合 + 複合指數 + alert gating 分離測試</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">backend/tests/test_notifier_multihazard.py</span></td>
+        <td><span class="badge new">NEW</span></td>
+        <td class="additions">+134</td>
+        <td class="deletions">0</td>
+        <td>通知模板渲染 + LINE/email 測試</td>
+      </tr>
+      <tr>
+        <td><span class="file-path">gis-service/tests/test_safety_gis_integration.py</span></td>
+        <td><span class="badge new">NEW</span></td>
+        <td class="additions">+274</td>
+        <td class="deletions">0</td>
+        <td>GIS 空間 AHP 整合: safety-index-map + terrain-profile + ahp-weights</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 新增 API 端點 -->
+  <h2>新增 API 端點</h2>
+  <div class="section-card">
+    <div class="title"><span class="tag gis">gis-service</span> 空間安全分析</div>
+    <ul class="endpoint-list">
+      <li>
+        <span class="method GET">GET</span>
+        <code>/api/v1/{project_id}/disaster/safety-index-map</code>
+        <br>
+        <small style="color:#8b949e">逐網格 AHP 安全指數 → GeoJSON。支援 static (地形only) / composite (含天氣) 模式。bbox 空間篩選、max_features 限制。</small>
+      </li>
+      <li>
+        <span class="method GET">GET</span>
+        <code>/api/v1/{project_id}/disaster/terrain-profile</code>
+        <br>
+        <small style="color:#8b949e">座標查詢最近網格地形參數 (slope/aspect/geomorphon/twi/elevation/ndvi/canopy_height/flow_accumulation)。供 backend 自動取得。</small>
+      </li>
+      <li>
+        <span class="method GET">GET</span>
+        <code>/api/v1/{project_id}/disaster/ahp-weights</code>
+        <br>
+        <small style="color:#8b949e">AHP 權重審計: groups/criteria/consistency_ratios/rationale/rainfall_reference/available_regions。</small>
+      </li>
+      <li>
+        <span class="method POST">POST</span>
+        <code>/api/v1/{project_id}/disaster/compute-static-risk</code>
+        <span class="badge modified">UPGRADED</span>
+        <br>
+        <small style="color:#8b949e">新增 region 參數，雙軌計算: 舊版 0-100 + AHP 1-5 五級。寫入 ahp_static_score / ahp_static_class 欄位。</small>
+      </li>
+    </ul>
+  </div>
+
+  <div class="section-card">
+    <div class="title"><span class="tag backend">backend</span> 多危害安全評估</div>
+    <ul class="endpoint-list">
+      <li>
+        <span class="method GET">GET</span>
+        <code>/weather/landslide-risk</code>
+        <span class="badge modified">UPGRADED</span>
+        <br>
+        <small style="color:#8b949e">新增參數: region, soil_type, accessibility_minutes, wildlife, abnormal_trees, use_gis_terrain, lon, lat, wind_speed_ms, temperature_c, humidity_pct, canopy_height_m, ndvi, aspect_deg, geomorphon, elevation_m。回傳多危害評估 + 複合指數 + terrain_source。</small>
+      </li>
+      <li>
+        <span class="method GET">GET</span>
+        <code>/weather/safety-criteria</code>
+        <span class="badge new">NEW</span>
+        <br>
+        <small style="color:#8b949e">AHP 權重透明化端點: 每個區域的 group/global 權重、一致性比率、評分詞彙、區域比較基準。</small>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 關鍵程式碼差異 -->
+  <h2>關鍵程式碼差異</h2>
+
+  <div class="section-card">
+    <div class="title"><span class="tag backend">backend</span> router.py — GIS 地形自動取得</div>
+    <div class="desc">新增 use_gis_terrain 參數，自動從 gis-service PostGIS 取得真實 DEM 地形值：</div>
+    <div class="code-block">
+<span class="add">+    use_gis_terrain: bool = Query(False, description="Auto-fetch terrain from gis-service PostGIS"),</span>
+<span class="add">+    lon: Optional[float] = Query(None, description="Site longitude (for gis-service terrain lookup)"),</span>
+<span class="add">+    lat: Optional[float] = Query(None, description="Site latitude (for gis-service terrain lookup)"),</span>
+<span class="ctx"> ):</span>
+<span class="ctx">     ...</span>
+<span class="add">+    terrain_source = "default"</span>
+<span class="add">+    if use_gis_terrain and lon is not None and lat is not None:</span>
+<span class="add">+        try:</span>
+<span class="add">+            async with httpx.AsyncClient(timeout=10) as client:</span>
+<span class="add">+                resp = await client.get(</span>
+<span class="add">+                    f"{_GIS_SERVICE_URL}/{project_id}/disaster/terrain-profile",</span>
+<span class="add">+                    params={"lon": lon, "lat": lat, "buffer_m": 60},</span>
+<span class="add">+                )</span>
+<span class="add">+                if resp.status_code == 200:</span>
+<span class="add">+                    data = resp.json()</span>
+<span class="add">+                    if data.get("found"):</span>
+<span class="add">+                        t = data["terrain"]</span>
+<span class="add">+                        slope_deg = t["slope_deg"] or slope_deg</span>
+<span class="add">+                        twi_max = t["twi"] or twi_max</span>
+<span class="add">+                        elevation_m = t["elevation_m"] or elevation_m</span>
+<span class="add">+                        # ... (aspect, geomorphon, flow_accum, ndvi, canopy, soil)</span>
+<span class="add">+                        terrain_source = f"gis-service (match {data.get('match_distance_m', '?')}m)"</span>
+<span class="add">+        except Exception as e:</span>
+<span class="add">+            logger.warning(f"gis-service terrain lookup failed: {e}")</span>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="title"><span class="tag gis">gis-service</span> disaster.py — safety-index-map 端點</div>
+    <div class="desc">逐網格讀取 terrain_risk_grid，用 AHP 14 項準則計算安全指數，輸出 GeoJSON：</div>
+    <div class="code-block">
+<span class="add">+@router.get("/{project_id}/disaster/safety-index-map")</span>
+<span class="add">+async def safety_index_map(</span>
+<span class="add">+    project_id: str = "baxianshan",</span>
+<span class="add">+    region: str = Query("taiwan"),</span>
+<span class="add">+    include_composite: bool = Query(False),</span>
+<span class="add">+    rt_mm: float = Query(0),</span>
+<span class="add">+    wind_speed_ms: float = Query(0),</span>
+<span class="add">+    wbgt_c: float = Query(0),</span>
+<span class="add">+):</span>
+<span class="ctx">     ...</span>
+<span class="add">+        for row in rows:</span>
+<span class="add">+            result = assess_safety_index(</span>
+<span class="add">+                region,</span>
+<span class="add">+                slope_deg=slope, elevation_m=elevation,</span>
+<span class="add">+                ndvi=ndvi, twi=twi, flow_accumulation=flow_accum,</span>
+<span class="add">+                geomorphon=geomorphon, aspect_deg=aspect,</span>
+<span class="add">+                rt_mm=rt_mm if include_composite else 0,</span>
+<span class="add">+                wind_speed_ms=wind_speed_ms if include_composite else 0,</span>
+<span class="add">+                wbgt_c=wbgt_c if include_composite else 0,</span>
+<span class="add">+            )</span>
+<span class="add">+            features.append({</span>
+<span class="add">+                "type": "Feature",</span>
+<span class="add">+                "geometry": geojson,</span>
+<span class="add">+                "properties": {</span>
+<span class="add">+                    "static_score": result["static_score"],</span>
+<span class="add">+                    "static_class": result["static_class"],</span>
+<span class="add">+                    "static_class_colour": result["static_class_colour"],</span>
+<span class="add">+                    # ... (composite if enabled)</span>
+<span class="add">+                },</span>
+<span class="add">+            })</span>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="title"><span class="tag gis">gis-service</span> disaster.py — compute-static-risk 雙軌升級</div>
+    <div class="desc">Step 1 舊版 SQL 0-100 分 + Step 2 Python AHP 1-5 五級：</div>
+    <div class="code-block">
+<span class="add">+    region: str = Query("taiwan", description="AHP region for safety index computation"),</span>
+<span class="ctx">     ...</span>
+<span class="ctx">     # Step 1: 舊版 SQL-based 靜態風險分數 (0-100)</span>
+<span class="ctx">     ...</span>
+<span class="add">+    # Step 2: AHP 靜態安全指數 (Python-side, per-grid-cell)</span>
+<span class="add">+    for row in rows:</span>
+<span class="add">+        ahp = assess_safety_index(region, slope_deg=slope, ...)</span>
+<span class="add">+        batch.append({"id": grid_id, "score": ahp["static_score"], "cls": ahp["static_class"]})</span>
+<span class="add">+    # UPDATE terrain_risk_grid SET ahp_static_score, ahp_static_class</span>
+<span class="ctx">     ...</span>
+<span class="add">+    return {</span>
+<span class="add">+        "grids_processed": count,       # 舊版</span>
+<span class="add">+        "ahp_grids_scored": ahp_count,  # AHP</span>
+<span class="add">+        "method": "舊版(0-100) + GIS-AHP(1-5, 5級) 雙軌計算",</span>
+<span class="add">+    }</span>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="title"><span class="tag backend">backend</span> providers.py — 多危害評估引擎</div>
+    <div class="desc">從單一崩塌評估擴展為四種危害，AHP 複合指數獨立計算不影響 alert gating：</div>
+    <div class="code-block">
+<span class="del">-    # Two-layer method: rainfall threshold + terrain factor</span>
+<span class="add">+    # Multi-hazard assessment: landslide + stream surge + treefall + heat</span>
+<span class="ctx">     ...</span>
+<span class="add">+    safety_index = assess_safety_index(</span>
+<span class="add">+        region, slope_deg=slope_deg, elevation_m=elevation_m,</span>
+<span class="add">+        soil_type=soil_type, ndvi=ndvi, twi=twi_max,</span>
+<span class="add">+        flow_accumulation=flow_accum_max, geomorphon=geomorphon,</span>
+<span class="add">+        aspect_deg=aspect_deg, rt_mm=rt, wind_speed_ms=wind["effective_wind_ms"],</span>
+<span class="add">+        wbgt_c=heat["wbgt_c"], wildlife=wildlife, abnormal_trees=abnormal_trees,</span>
+<span class="add">+    )</span>
+<span class="add">+    assessment["composite_index"] = safety_index</span>
+<span class="ctx">     ...</span>
+<span class="add">+    # safety_level = worst across all hazards (drives notifications)</span>
+<span class="add">+    # risk_level = official SWCB/JMA landslide alert (unchanged)</span>
+    </div>
+  </div>
+
+  <!-- AHP 14 項準則 -->
+  <h2>AHP 14 項安全準則</h2>
+  <div class="section-card">
+    <div class="desc">依 Rahmawati et al. (2025) 框架，分為 4 個群組，每項評分 1-5 分：</div>
+    <table class="file-table">
+      <thead>
+        <tr><th>群組</th><th>準則</th><th>評分依據</th><th>類型</th></tr>
+      </thead>
+      <tbody>
+        <tr><td rowspan="5"><strong>生物物理</strong><br><small>Biophysical</small></td><td>坡度 (slope)</td><td>SWCB 坡度分級 15°/25°/35°/45°</td><td>靜態</td></tr>
+        <tr><td>高程 (elevation)</td><td>500/1000/1500/2500m</td><td>靜態</td></tr>
+        <tr><td>地質 (soil_type)</td><td>slate/mudstone/colluvium/sandstone</td><td>靜態</td></tr>
+        <tr><td>植被 (ndvi)</td><td>NDVI 0.2/0.4/0.6/0.8</td><td>靜態</td></tr>
+        <tr><td>可及性 (accessibility)</td><td>步行時間 15/30/60/120min</td><td>靜態</td></tr>
+        <tr><td rowspan="4"><strong>水文</strong><br><small>Hydrological</small></td><td>TWI</td><td>Beven & Kirkby 2/4/6/8</td><td>靜態</td></tr>
+        <tr><td>流量累積 (flow_accum)</td><td>1000/5000/10000/50000</td><td>靜態</td></tr>
+        <tr><td>地形態 (geomorphon)</td><td>Jasiewicz 10 類地貌</td><td>靜態</td></tr>
+        <tr><td>坡向 (aspect)</td><td>向風/背風側差異</td><td>靜態</td></tr>
+        <tr><td rowspan="3"><strong>氣候</strong><br><small>Climate</small></td><td>降雨 (rainfall)</td><td>區域基準 mm (CWA 350/JMA 200/BMKG 100)</td><td><span style="color:var(--accent)">動態</span></td></tr>
+        <tr><td>風速 (wind)</td><td>職安署 6/10/13/17 m/s + 土壤飽和修正</td><td><span style="color:var(--accent)">動態</span></td></tr>
+        <tr><td>熱危害 (WBGT)</td><td>職安署 25/28/31/33°C</td><td><span style="color:var(--accent)">動態</span></td></tr>
+        <tr><td rowspan="2"><strong>威脅</strong><br><small>Threat</small></td><td>野生動物 (wildlife)</td><td>hornets/bears/snakes/boars</td><td>靜態</td></tr>
+        <tr><td>異常木 (abnormal_trees)</td><td>site survey: none/scattered/widespread</td><td>靜態</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 測試結果 -->
+  <h2>測試結果</h2>
+  <div class="test-results">
+    <div class="test-bar">
+      <span class="name">backend: test_safety_index.py</span>
+      <span class="count">30 passed</span>
+      <div class="bar"><div class="bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="test-bar">
+      <span class="name">backend: test_multihazard.py</span>
+      <span class="count">34 passed</span>
+      <div class="bar"><div class="bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="test-bar">
+      <span class="name">backend: test_notifier_multihazard.py</span>
+      <span class="count">13 passed</span>
+      <div class="bar"><div class="bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="test-bar">
+      <span class="name">gis-service: test_safety_gis_integration.py</span>
+      <span class="count">13 passed</span>
+      <div class="bar"><div class="bar-fill" style="width:100%"></div></div>
+    </div>
+    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border); font-size:14px;">
+      <strong style="color:var(--green);">總計: 90 tests passed, 0 failed</strong>
+    </div>
+  </div>
+
+  <!-- 設計原則 -->
+  <h2>設計原則</h2>
+  <div class="section-card">
+    <ul style="list-style:none; padding:0;">
+      <li style="padding:8px 0; border-bottom:1px solid rgba(48,54,61,0.5);">
+        <strong style="color:var(--red);">複合指數不稀釋警報觸發</strong> — AHP composite index 僅作為規劃參考，alert gating 仍由官方 SWCB/JMA 門檻值驅動。測試 <code>test_composite_index_does_not_soften_a_threshold_breach</code> 確保此分離。
+      </li>
+      <li style="padding:8px 0; border-bottom:1px solid rgba(48,54,61,0.5);">
+        <strong style="color:var(--accent);">Static score 不含天氣</strong> — 地形only 分數可用於長期規劃分區，不受天氣變化影響。測試 <code>test_static_score_excludes_weather</code> 確保。
+      </li>
+      <li style="padding:8px 0; border-bottom:1px solid rgba(48,54,61,0.5);">
+        <strong style="color:var(--green);">雙軌相容</strong> — 舊版 0-100 分與 AHP 1-5 五級並存，既有前端不受影響，新前端可逐步遷移。
+      </li>
+      <li style="padding:8px 0;">
+        <strong style="color:var(--purple);">AHP 可審計</strong> — 權重、一致性比率、評分詞彙全部透過 API 公開，專家可 review 並追溯。
+      </li>
+    </ul>
+  </div>
+
+  <!-- 即時驗證結果 -->
+  <h2>即時驗證結果</h2>
+  <div class="section-card">
+    <div class="desc">已插入 3 筆測試網格到 baxianshan.terrain_risk_grid 並驗證端點回應：</div>
+    <div class="code-block">
+<span style="color:var(--green)"># safety-index-map (static mode)</span>
+GET /api/v1/baxianshan/disaster/safety-index-map?region=taiwan
+→ 200, FeatureCollection, 3 features
+  slope=45° twi=8.5  static=3.44 class=高
+  slope=38° twi=5.2  static=2.92 class=中
+  slope=15° twi=2.1  static=1.72 class=極低
+
+<span style="color:var(--green)"># safety-index-map (composite mode, rt=150mm, wind=12m/s, wbgt=30°C)</span>
+GET /api/v1/baxianshan/disaster/safety-index-map?include_composite=true&rt_mm=150&wind_speed_ms=12&wbgt_c=30
+→ 200, composite_dist: {low:1, moderate:2}
+  slope=45° static=3.44 composite=3.10 class=中
+  slope=38° static=2.92 composite=2.83 class=中
+  slope=15° static=1.72 composite=2.20 class=低
+
+<span style="color:var(--green)"># terrain-profile</span>
+GET /api/v1/baxianshan/disaster/terrain-profile?lon=121.02&lat=24.14
+→ 200, found=true, slope=15° twi=2.1 elev=1100m
+
+<span style="color:var(--green)"># ahp-weights</span>
+GET /api/v1/baxianshan/disaster/ahp-weights?region=taiwan
+→ 200, region=台灣, CR={groups:0.017, biophysical:0.004, hydro:0.018, climate:0.033, threat:0.0}
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  GIS-AHP 複合安全指數整合報告 · 2026-08-11 · SylvaNexus Forest Safety Platform
+</div>
+
+</body>
+</html>

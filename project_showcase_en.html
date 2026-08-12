@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SylvaNexus — Forest Operations Safety Platform</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --heading: #f0f6fc;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #d29922;
+    --orange: #db6d28;
+    --purple: #bc8cff;
+    --code-bg: #1c2128;
+    --forest: #2ea043;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .hero {
+    background: linear-gradient(135deg, #0d2818 0%, #0d1117 60%, #1a2332 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 24px 40px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 32px;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+  .hero .subtitle {
+    font-size: 17px;
+    color: var(--forest);
+    margin-bottom: 12px;
+  }
+  .hero .meta {
+    font-size: 14px;
+    color: #8b949e;
+  }
+  .hero .meta a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  h2 {
+    font-size: 22px;
+    color: var(--heading);
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 17px;
+    color: var(--heading);
+    margin: 24px 0 12px;
+  }
+  p { margin-bottom: 12px; }
+  strong { color: var(--heading); }
+  a { color: var(--accent); }
+  code {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 13px;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card .title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 12px;
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .feature-card .icon { font-size: 28px; margin-bottom: 8px; }
+  .feature-card h4 { font-size: 15px; color: var(--heading); margin-bottom: 6px; }
+  .feature-card p { font-size: 13px; color: var(--text); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  th {
+    background: var(--card);
+    color: #8b949e;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  td code { font-size: 12px; }
+  .arch {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 16px 0;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .callout {
+    background: rgba(46,160,67,0.08);
+    border: 1px solid rgba(46,160,67,0.3);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .callout.warning {
+    background: rgba(210,153,34,0.08);
+    border-color: rgba(210,153,34,0.3);
+  }
+  .endpoint {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    font-size: 14px;
+  }
+  .endpoint:last-child { border-bottom: none; }
+  .method {
+    display: inline-block;
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+  .method.GET { background: rgba(63,185,80,0.15); color: var(--green); }
+  .method.POST { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .stat-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat .num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--heading);
+  }
+  .stat .label {
+    font-size: 12px;
+    color: #8b949e;
+  }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 6px; }
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: #8b949e;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 6px;
+  }
+  .badge.new { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+  .badge.live { background: rgba(88,166,255,0.15); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>SylvaNexus Forest Operations Safety Platform</h1>
+  <div class="subtitle">Real-time multi-hazard early-warning system for mountain forestry</div>
+  <div class="meta">
+    Based on Rahmawati, Yovi & Setiawan (2025) GIS-AHP framework ·
+    Live deployment in Taiwan (Baxianshan National Forest) ·
+    <a href="https://github.com/Fuilko/SaaSDocker">GitHub Repository</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Introduction -->
+  <h2>About This Project</h2>
+  <div class="card">
+    <p>
+      <strong>SylvaNexus</strong> is a real-time occupational safety platform for forest operations
+      in mountainous terrain. It was originally built as a landslide-only warning system using
+      CWA (Taiwan Central Weather Administration) rainfall data and DEM-derived terrain factors.
+    </p>
+    <p>
+      We have now integrated the <strong>12-parameter GIS-AHP framework</strong> from
+      Rahmawati, Yovi & Setiawan (2025) to upgrade from single-hazard alerts to a
+      <strong>full multi-hazard occupational safety tool</strong>. Your framework — especially
+      the AHP weighting methodology, wind speed, temperature/humidity (WBGT), soil type,
+      and abnormal tree condition criteria — covers exactly the non-landslide hazards we were missing.
+    </p>
+    <div class="callout">
+      <strong>Our goal:</strong> Protect forest workers' lives by providing site-specific,
+      multi-hazard safety assessments with clear, actionable notifications — not just
+      landslide alerts, but a comprehensive safety picture for the entire work environment.
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <h2>Platform at a Glance</h2>
+  <div class="card">
+    <div class="stat-row">
+      <div class="stat"><div class="num">4</div><div class="label">Hazards Assessed</div></div>
+      <div class="stat"><div class="num">14</div><div class="label">AHP Criteria</div></div>
+      <div class="stat"><div class="num">3</div><div class="label">Region Profiles</div></div>
+      <div class="stat"><div class="num">90+</div><div class="label">Test Cases</div></div>
+      <div class="stat"><div class="num">5</div><div class="label">Safety Classes</div></div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <h2>System Architecture</h2>
+  <div class="arch">
+┌─────────────────────────────────────────────────────────────┐
+│  Backend Service (FastAPI + Python)                         │
+│                                                             │
+│  Data Sources:                                              │
+│    ├─ CWA real-time rainfall (1h / 3h / 24h)               │
+│    ├─ CWA weather stations (wind, temp, humidity)           │
+│    ├─ CWA 36h township forecasts                           │
+│    ├─ CWA earthquake reports (threshold auto-reduction)     │
+│    ├─ DEM terrain: slope, TWI, flow accumulation,           │
+│    │  geomorphon, aspect, elevation                         │
+│    └─ Sentinel-2: canopy height, NDVI                      │
+│                                                             │
+│  Assessment Engine:                                         │
+│    ├─ Landslide: SWCB effective rainfall (Rt) thresholds    │
+│    │  4 levels: safe → watch → yellow_alert → red_alert    │
+│    ├─ Stream surge: rainfall intensity + flow accumulation  │
+│    ├─ Treefall: wind speed + soil saturation correction     │
+│    ├─ Heat stress: WBGT (wet-bulb globe temperature)        │
+│    └─ GIS-AHP Composite Safety Index (1-5, 5 classes)       │
+│       14 criteria, 4 groups, region-specific AHP weights    │
+│                                                             │
+│  Notifications:                                             │
+│    ├─ LINE Notify (field workers)                           │
+│    └─ Email (supervisors, local authorities)                │
+└──────────────────────┬──────────────────────────────────────┘
+                       │ httpx terrain auto-fetch
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│  GIS Service (FastAPI + PostGIS + WhiteboxTools)            │
+│                                                             │
+│  Spatial Analysis:                                          │
+│    ├─ DEM smoothing, slope, geomorphons (Jasiewicz 2013)    │
+│    ├─ TWI calculation (Beven & Kirkby 1979)                 │
+│    ├─ Flow accumulation, catchment area                     │
+│    └─ Per-grid-cell AHP safety index computation            │
+│                                                             │
+│  Outputs:                                                   │
+│    ├─ GeoJSON safety index map (5-class color-coded)        │
+│    ├─ Terrain profile lookup by coordinates                 │
+│    └─ AHP weight audit endpoint                             │
+│                                                             │
+│  Database: PostGIS terrain_risk_grid (30m cells)            │
+│    + ahp_static_score / ahp_static_class                    │
+│    + ahp_composite_score / ahp_composite_class              │
+└─────────────────────────────────────────────────────────────┘
+  </div>
+
+  <!-- How your framework is implemented -->
+  <h2>How Your Framework Is Implemented</h2>
+
+  <div class="card">
+    <div class="title">AHP Weight Derivation</div>
+    <p>
+      We implemented the full Analytic Hierarchy Process with pairwise comparison matrices
+      and Saaty's consistency ratio check. Each region has its own set of matrices at two
+      levels: group-level (4 groups) and criterion-level (within each group).
+    </p>
+    <p>
+      Weights are derived using the geometric mean approximation for the principal eigenvector.
+      Consistency ratios are checked against the 0.10 threshold — if exceeded, an exception
+      is raised and the system refuses to operate with inconsistent weights.
+    </p>
+    <ul>
+      <li><code>app/weather/ahp.py</code> — AHP engine (156 lines)</li>
+      <li><code>app/modules/safety/ahp.py</code> — Ported copy in GIS service</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="title">14 Safety Criteria (4 Groups)</div>
+    <p>We expanded your 12-parameter framework to 14 criteria, organized into 4 groups:</p>
+    <table>
+      <thead>
+        <tr><th>Group</th><th>Criteria</th><th>Scoring Basis</th><th>Type</th></tr>
+      </thead>
+      <tbody>
+        <tr><td rowspan="5"><strong>Biophysical</strong></td><td>Slope</td><td>SWCB slope classes (15°/25°/35°/45°)</td><td>Static</td></tr>
+        <tr><td>Elevation</td><td>500/1000/1500/2500m bands</td><td>Static</td></tr>
+        <tr><td>Soil/Geology</td><td>slate, mudstone, colluvium, sandstone</td><td>Static</td></tr>
+        <tr><td>Vegetation (NDVI)</td><td>Sentinel-2 NDVI 0.2/0.4/0.6/0.8</td><td>Static</td></tr>
+        <tr><td>Accessibility</td><td>Walking time to road: 15/30/60/120 min</td><td>Static</td></tr>
+        <tr><td rowspan="4"><strong>Hydrological</strong></td><td>TWI</td><td>Beven & Kirkby (1979): 2/4/6/8</td><td>Static</td></tr>
+        <tr><td>Flow accumulation</td><td>1000/5000/10000/50000</td><td>Static</td></tr>
+        <tr><td>Geomorphon</td><td>Jasiewicz & Stepinski (2013) 10 landform classes</td><td>Static</td></tr>
+        <tr><td>Aspect</td><td>Windward vs leeward (typhoon exposure)</td><td>Static</td></tr>
+        <tr><td rowspan="3"><strong>Climate</strong></td><td>Rainfall (Rt)</td><td>Region-specific: CWA 350mm / JMA 200mm / BMKG 100mm</td><td>Dynamic</td></tr>
+        <tr><td>Wind speed</td><td>OSHA Taiwan: 6/10/13/17 m/s + soil saturation correction</td><td>Dynamic</td></tr>
+        <tr><td>Heat stress (WBGT)</td><td>OSHA Taiwan: 25/28/31/33°C</td><td>Dynamic</td></tr>
+        <tr><td rowspan="2"><strong>Threat</strong></td><td>Wildlife</td><td>hornets, bears, snakes, wild boars</td><td>Static</td></tr>
+        <tr><td>Abnormal trees</td><td>Site survey: none / scattered / widespread</td><td>Static</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="title">Region-Specific AHP Profiles</div>
+    <p>
+      We defined three region profiles with different pairwise comparison matrices, reflecting
+      different climate, geology, and ecological conditions:
+    </p>
+    <table>
+      <thead>
+        <tr><th>Region</th><th>Rainfall Authority</th><th>Reference (mm)</th><th>Key Difference</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Taiwan</strong></td><td>CWA / SWCB</td><td>350 mm/24h</td>
+          <td>Typhoon-driven; steep terrain; hornets prominent</td>
+        </tr>
+        <tr>
+          <td><strong>Japan</strong></td><td>JMA</td><td>200 mm/24h</td>
+          <td>Volcanic soil; bears; lower rainfall threshold</td>
+        </tr>
+        <tr>
+          <td><strong>Indonesia</strong></td><td>BMKG</td><td>100 mm/24h</td>
+          <td>Tropical; mudstone/lahar; snakes; lowest threshold</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      All consistency ratios are below 0.10 (verified by automated tests).
+      Weights are exposed via a public API endpoint for expert review and auditability.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="title">Composite vs Static Safety Index</div>
+    <p>
+      Following your framework's distinction between terrain-inherent risk and dynamic conditions:
+    </p>
+    <ul>
+      <li>
+        <strong>Static score</strong> — Terrain-only, excludes weather. Used for long-term
+        planning, site comparison, and safety zoning. Computed from 11 static criteria
+        (biophysical + hydrological + threat groups).
+      </li>
+      <li>
+        <strong>Composite score</strong> — Includes real-time weather (rainfall, wind, WBGT).
+        Used for dynamic operational safety assessment. The dynamic share (% contribution
+        from weather) is reported so users can see how much current conditions elevate
+        baseline terrain risk.
+      </li>
+    </ul>
+    <div class="callout warning">
+      <strong>Design principle:</strong> The composite index is a <em>planning reference</em>,
+      not an alert trigger. Official SWCB/JMA rainfall thresholds still drive alert levels.
+      This prevents the AHP score from diluting or softening official warnings.
+      (Verified by test: <code>test_composite_index_does_not_soften_a_threshold_breach</code>)
+    </div>
+  </div>
+
+  <!-- Spatial GIS Integration -->
+  <h2>Spatial GIS Integration</h2>
+  <div class="card">
+    <div class="title">From Single-Point to Spatial Risk Maps</div>
+    <p>
+      Your paper's core contribution is the <strong>spatial</strong> GIS-AHP approach —
+      applying the composite index across a grid, not just at one point. We've implemented this:
+    </p>
+    <ul>
+      <li>
+        <strong>Per-grid-cell computation:</strong> The GIS service reads <code>terrain_risk_grid</code>
+        (30m PostGIS cells with slope, TWI, geomorphon, elevation, NDVI, canopy height) and
+        computes the AHP safety index for each cell.
+      </li>
+      <li>
+        <strong>GeoJSON output:</strong> The <code>/safety-index-map</code> endpoint returns a
+        FeatureCollection where each feature is a grid cell with <code>static_score</code>,
+        <code>static_class</code>, and color — ready for frontend map rendering.
+      </li>
+      <li>
+        <strong>Real terrain auto-fetch:</strong> The backend can call the GIS service to
+        get actual DEM-derived parameters for any coordinate, replacing manual representative
+        values with spatially accurate data.
+      </li>
+    </ul>
+  </div>
+
+  <!-- API Endpoints -->
+  <h2>API Endpoints</h2>
+  <div class="card">
+    <div class="title">Backend (Multi-Hazard Assessment)</div>
+    <div class="endpoint">
+      <span class="method GET">GET</span>
+      <code>/weather/landslide-risk</code>
+      <span class="badge live">LIVE</span>
+      <br><small style="color:#8b949e">
+        Multi-hazard assessment: landslide (SWCB Rt), stream surge, treefall (wind+soil),
+        heat stress (WBGT). Returns safety_level, composite_index, per-hazard details.
+        Supports <code>use_gis_terrain=true</code> with lon/lat for auto-fetching real DEM data.
+      </small>
+    </div>
+    <div class="endpoint">
+      <span class="method GET">GET</span>
+      <code>/weather/safety-criteria</code>
+      <span class="badge new">NEW</span>
+      <br><small style="color:#8b949e">
+        AHP weight audit: group weights, global weights, consistency ratios, scoring
+        vocabulary, regional rationale. For expert review and transparency.
+      </small>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">GIS Service (Spatial Analysis)</div>
+    <div class="endpoint">
+      <span class="method GET">GET</span>
+      <code>/api/v1/{project_id}/disaster/safety-index-map</code>
+      <span class="badge new">NEW</span>
+      <br><small style="color:#8b949e">
+        Per-grid-cell AHP safety index → GeoJSON FeatureCollection. Supports static
+        (terrain-only) and composite (with weather) modes. Bbox spatial filtering.
+      </small>
+    </div>
+    <div class="endpoint">
+      <span class="method GET">GET</span>
+      <code>/api/v1/{project_id}/disaster/terrain-profile</code>
+      <span class="badge new">NEW</span>
+      <br><small style="color:#8b949e">
+        Query terrain parameters at any coordinate. Returns slope, aspect, geomorphon,
+        TWI, flow accumulation, elevation, NDVI, canopy height from PostGIS grid.
+      </small>
+    </div>
+    <div class="endpoint">
+      <span class="method GET">GET</span>
+      <code>/api/v1/{project_id}/disaster/ahp-weights</code>
+      <span class="badge new">NEW</span>
+      <br><small style="color:#8b949e">
+        Full AHP audit: weights, consistency ratios, group/criteria breakdown,
+        rainfall references, geology scores, wildlife hazards per region.
+      </small>
+    </div>
+    <div class="endpoint">
+      <span class="method POST">POST</span>
+      <code>/api/v1/{project_id}/disaster/compute-static-risk</code>
+      <span class="badge new">UPGRADED</span>
+      <br><small style="color:#8b949e">
+        Dual-track computation: legacy 0-100 risk score + AHP 1-5 five-class safety index.
+        Stores both in PostGIS for backward compatibility.
+      </small>
+    </div>
+  </div>
+
+  <!-- Notification System -->
+  <h2>Notification System</h2>
+  <div class="card">
+    <p>
+      When safety_level reaches <strong>yellow_alert</strong> or above, the system automatically
+      sends notifications via:
+    </p>
+    <ul>
+      <li><strong>LINE Notify</strong> — to field workers' phones (most common in Taiwan forestry)</li>
+      <li><strong>Email</strong> — to supervisors and local authorities</li>
+    </ul>
+    <p>
+      Messages include the overall safety level, primary hazards, and the composite safety index
+      as a planning reference. Language is safety-oriented and advisory, not alarmist.
+    </p>
+    <p>
+      The scheduler runs periodic assessments and avoids repeat notifications at the same level
+      to prevent alert fatigue.
+    </p>
+  </div>
+
+  <!-- What we've added beyond the paper -->
+  <h2>Extensions Beyond the Paper</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">🌧️</div>
+      <h4>Real-time CWA Integration</h4>
+      <p>Live rainfall from Taiwan's weather administration, not simulated data. Earthquake-adjusted thresholds (Rt auto-reduced after seismic events).</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📡</div>
+      <h4>Sentinel-2 Vegetation</h4>
+      <p>Canopy height and NDVI from Google Earth Engine, integrated into the vegetation criterion scoring.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔔</div>
+      <h4>Automated Notifications</h4>
+      <p>LINE + Email alerts triggered by safety level, not just risk score. Composite index included as planning reference.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🗺️</div>
+      <h4>Spatial Risk Maps</h4>
+      <p>Per-grid-cell AHP computation across entire forest areas, output as GeoJSON for map rendering. Not just single-point assessment.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🌏</div>
+      <h4>Multi-Region Support</h4>
+      <p>Taiwan, Japan, Indonesia profiles with different AHP weights, rainfall authorities, and ecological hazards.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📋</div>
+      <h4>Full Auditability</h4>
+      <p>AHP weights, consistency ratios, and scoring vocabulary exposed via API. Every score is traceable to its inputs and weights.</p>
+    </div>
+  </div>
+
+  <!-- Testing -->
+  <h2>Testing & Verification</h2>
+  <div class="card">
+    <p>We maintain 90+ automated tests covering:</p>
+    <table>
+      <thead><tr><th>Test Suite</th><th>Tests</th><th>Coverage</th></tr></thead>
+      <tbody>
+        <tr><td>AHP mechanics</td><td>30</td><td>Weight derivation, consistency ratio, classification boundaries</td></tr>
+        <tr><td>Multi-hazard integration</td><td>34</td><td>Landslide + wind + heat + stream surge, alert gating separation</td></tr>
+        <tr><td>Notification rendering</td><td>13</td><td>LINE message, email template, repeat suppression</td></tr>
+        <tr><td>GIS spatial integration</td><td>13</td><td>safety-index-map, terrain-profile, ahp-weights endpoints</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <strong>Key test:</strong> <code>test_composite_index_does_not_soften_a_threshold_breach</code> —
+      ensures the AHP composite index never dilutes official SWCB/JMA alert triggers.
+    </div>
+  </div>
+
+  <!-- Collaboration -->
+  <h2>Collaboration Invitation</h2>
+  <div class="card">
+    <p>
+      Dear Azelia,
+    </p>
+    <p>
+      Thank you for developing the GIS-AHP forest work safety framework. We have implemented
+      your methodology in a live platform for Taiwan's mountain forestry operations, and
+      believe there is significant potential for collaboration.
+    </p>
+    <p>
+      <strong>What we can offer:</strong>
+    </p>
+    <ul>
+      <li>A working real-world deployment with live CWA weather data and DEM terrain</li>
+      <li>Implementation of your 12-parameter framework (expanded to 14 criteria) with full AHP weight auditability</li>
+      <li>Spatial GIS integration — per-grid-cell safety index maps via PostGIS</li>
+      <li>Multi-region support (Taiwan, Japan, Indonesia) with region-specific AHP weights</li>
+      <li>Automated LINE + Email notification system for field workers</li>
+      <li>90+ automated tests ensuring correctness and consistency</li>
+    </ul>
+    <p>
+      <strong>What we'd love your input on:</strong>
+    </p>
+    <ul>
+      <li>Validation of our AHP pairwise comparison matrices against your expert judgement</li>
+      <li>Moran's I spatial autocorrelation validation (we haven't implemented this yet)</li>
+      <li>Scoring calibration — are our 1-5 bands aligned with your intended thresholds?</li>
+      <li>Extension to other Pacific countries facing climate change forest risks</li>
+      <li>Co-authorship on a paper documenting the real-world implementation</li>
+    </ul>
+    <p>
+      As you mentioned — one day, Pacific countries working together on climate change
+      and forest issues would be wonderful. We share that vision.
+    </p>
+    <p style="margin-top: 20px; color: #8b949e;">
+      Best regards,<br>
+      The SylvaNexus Team<br>
+      Taiwan 🇹🇼
+    </p>
+  </div>
+
+  <!-- Repository Access -->
+  <h2>Repository Access</h2>
+  <div class="card">
+    <p>
+      The full source code is available on GitHub:
+      <a href="https://github.com/Fuilko/SaaSDocker">github.com/Fuilko/SaaSDocker</a>
+    </p>
+    <div class="callout warning">
+      <strong>Note on access:</strong> The repository is currently private. We can:
+      <ul style="margin-top: 8px;">
+        <li>Add you as a collaborator (simplest — just share your GitHub username)</li>
+        <li>Create a public fork with sensitive configs removed</li>
+        <li>Share a Docker image so you can run it locally without source access</li>
+      </ul>
+      Please let us know which option works best for you.
+    </div>
+    <p>
+      <strong>Tech stack:</strong> Python 3.11, FastAPI, PostgreSQL/PostGIS, Docker,
+      WhiteboxTools, Google Earth Engine, CWA API, LINE Notify API.
+    </p>
+  </div>
+
+</div>
+
+<div class="footer">
+  SylvaNexus Forest Operations Safety Platform · Taiwan 🇹🇼 · Japan 🇯🇵 · Indonesia 🇮🇩<br>
+    </div>
+
+</body>
+</html>

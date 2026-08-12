@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Data / large files
+*.csv
+*.obj
+*.ply
+*.glb
+*.sdat
+*.tif
+*.tiff
+*.geojson
+*.shp
+*.dbf
+*.shx
+*.prj
+*.zip
+*.tar.gz
