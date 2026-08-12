@@ -357,6 +357,52 @@
 
 </div>
 
+<!-- ===================== RELATED PROJECTS ===================== -->
+<h2>Shared Technology Stack — Related Projects</h2>
+<p class="section-intro">
+  The same GIS + LLM infrastructure that powers SylvaNexus also supports other domain applications.
+  These projects share the same AWS EC2 instance, PostGIS database, and nginx reverse proxy,
+  demonstrating the extensibility of the platform architecture.
+</p>
+
+<div class="grid">
+
+  <div class="card" style="border-color: var(--accent2);">
+    <h3><span class="icon">⚖️</span> LegalShield-jp</h3>
+    <p>
+      A Japan-focused legal-aid GIS platform that aggregates public datasets (crime statistics,
+      NPO/NGO directories, legal consultation offices) with user GPS location to instantly return
+      "nearest support resources + local risk indicators" in one shot.
+    </p>
+    <p>
+      Built on the same FastAPI + PostGIS + pgvector stack, with LLM-powered document Q&amp;A
+      over Japanese legal texts. Shares EC2, PostgreSQL, and nginx with SylvaNexus.
+    </p>
+    <p style="margin-top: 12px;">
+      <small><strong>Data sources:</strong> 警察庁 open data, e-Stat, 法テラス, 内閣府 NPO list, 国土数値情報</small><br>
+      <small><strong>Repo:</strong> <a href="https://github.com/Fuilko/lawandbabysupport">github.com/Fuilko/lawandbabysupport</a></small>
+    </p>
+  </div>
+
+  <div class="card" style="border-color: var(--accent2);">
+    <h3><span class="icon">📚</span> Forestry Knowledge MCP</h3>
+    <p>
+      A Model Context Protocol (MCP) server exposing a pgvector-backed corpus of forestry
+      research papers and local documents to AI agents. Enables semantic search, citation
+      network analysis, and site-specific literature recommendations.
+    </p>
+    <p>
+      Uses bge-m3 embeddings with tsvector fallback. Designed to feed research context
+      into the SylvaNexus safety scoring and advisory pipeline.
+    </p>
+    <p style="margin-top: 12px;">
+      <small><strong>Tools:</strong> search_papers, search_local_docs, get_citation_network, recommend_for_site</small><br>
+      <small><strong>Status:</strong> Skeleton — schema + MCP server done, awaiting OpenAlex harvest</small>
+    </p>
+  </div>
+
+</div>
+
 <!-- ===================== COLLABORATION ===================== -->
 <h2>Collaboration Invitation</h2>
 
